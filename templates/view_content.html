@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Marketing Content</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <style>
+        .hidden {
+            display: none;
+        }
+        
+        .content-item {
+            position: relative;
+        }
+        
+        #loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .regenerate-btn {
+            padding: 8px 16px;
+            background-color: #38a169;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .regenerate-btn:hover {
+            background-color: #2f855a;
+        }
+
+        .regenerate-btn:focus {
+            outline: 2px solid #2c5282;
+            outline-offset: 2px;
+        }
+
+        .regenerate-btn:disabled {
+            background-color: #68d391;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .regenerate-btn .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .regenerate-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        .regenerate-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .content-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-image {
+            width: 100%;
+            max-width: 600px; /* Adjusted image size */
+            height: auto;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .platform-badge {
+            background-color: #e2e8f0; /* Light gray */
+            color: #2d3748; /* Dark gray */
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem; /* Smaller font size */
+        }
+
+        .hashtag, .keyword {
+            background-color: #bee3f8; /* Light blue */
+            color: #2b6cb0; /* Dark blue */
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            margin-right: 0.5rem;
+            font-size: 0.875rem; /* Smaller font size */
+        }
+
+        .no-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <script>
+        function regenerateContent(contentId) {
+            const btn = document.querySelector(`[data-content-id="${contentId}"] .regenerate-btn`);
+            btn.disabled = true;
+            btn.classList.add('loading');
+
+            fetch(`/regenerate_single_content/${contentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 180000);
+                    } else {
+                        throw new Error(data.message || 'Error regenerating content');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error: ' + error.message);
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                });
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto p-4">
+    <div class="nav-menu mb-4">
+        <div class="nav-menu-links flex space-x-4">
+            <a href="{{ url_for('index') }}" class="text-blue-600 hover:underline">Dashboard</a>
+            <a href="{{ url_for('register') }}" class="text-blue-600 hover:underline">Register Company</a>
+            <a href="{{ url_for('modify') }}" class="text-blue-600 hover:underline">Modify Company</a>
+        </div>
+        <a href="{{ url_for('logout') }}" class="text-red-600 hover:underline">Logout</a>
+    </div>
+    <h1 class="text-2xl font-bold mb-4">Marketing Content</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} bg-red-100 text-red-800 p-2 rounded mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if content %}
+        {% for item in content %}
+            <div class="content-card bg-white shadow-md rounded-lg p-4 mb-4" data-content-id="{{ item._id }}">
+                <div class="content-header flex justify-between items-center mb-4">
+                    <div class="header-left">
+                        <h2 class="text-xl font-semibold">{{ item.company_name }}</h2>
+                        <span class="platform-badge">{{ item.platform|title }}</span>
+                    </div>
+                    <button 
+                        onclick="regenerateContent('{{ item._id }}')" 
+                        class="regenerate-btn"
+                    >
+                        <span class="spinner"></span>
+                        <span class="btn-text">Regenerate</span>
+                    </button>
+                </div>
+
+                {% if item.content %}
+                    <div class="content-title font-bold text-lg">{{ item.content.get('Title', 'No Title') }}</div>
+                    <div class="content-punchline text-gray-600">{{ item.content.get('Punchline', 'No Punchline') }}</div>
+                    <div class="content-main mt-2">{{ item.content.get('Content', 'No Content Available') }}</div>
+
+                    {% if item.content.get('Hashtags') %}
+                        <div class="hashtags mt-2">
+                            {% for hashtag in item.content['Hashtags'] %}
+                                <span class="hashtag">{{ hashtag }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if item.content.get('Keywords') %}
+                        <div class="keywords mt-2">
+                            {% for keyword in item.content['Keywords'] %}
+                                <span class="keyword">{{ keyword }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                {% if item.image_id %}
+                    <img 
+                        src="{{ url_for('serve_image', image_id=item.image_id) }}" 
+                        alt="Content Image" 
+                        class="content-image"
+                        onerror="this.classList.add('image-error'); this.parentElement.innerHTML='Image could not be loaded'"
+                    >
+                {% endif %}
+
+                <div class="metadata mt-4 text-gray-500 text-sm">
+                    <div>Day: {{ item.day }} {% if item.day_of_week %}({{ item.day_of_week }}){% endif %}</div>
+                    <div>Content Date: {{ item.content_date }}</div>
+                    <div>Generated: {{ item.generated_at }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-content bg-white shadow-md rounded-lg p-4">
+            <h2 class="text-xl font-semibold">No content available</h2>
+            <p>There is no marketing content generated for your companies yet.</p>
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>

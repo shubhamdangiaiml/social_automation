@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify Company Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Modify Company Details</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-dismissible fade show" role="alert">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for company in companies %}
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Company Name</td>
+                    <td><span class="value">{{ company.company_name }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Business Domain</td>
+                    <td><span class="value">{{ company.business_domain }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Specific Focus</td>
+                    <td><span class="value">{{ company.specific_focus }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Target Audience</td>
+                    <td><span class="value">{{ company.target_audience }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Key Features</td>
+                    <td><span class="value">{{ company.key_features }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Unique Selling Points</td>
+                    <td><span class="value">{{ company.unique_selling_points }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Pricing Packages</td>
+                    <td><span class="value">{{ company.pricing_packages }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Days</td>
+                    <td><span class="value">{{ company.days }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Target Platform</td>
+                    <td><span class="value">{{ company.target_platform }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+                <tr data-company-name="{{ company.company_name }}">
+                    <td>Posting Schedule</td>
+                    <td><span class="value">{{ company.posting_schedule }}</span></td>
+                    <td><button class="btn btn-primary edit-btn">Edit</button></td>
+                </tr>
+
+                <!-- Add a hidden input for the original values -->
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="//cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="//stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Inline Editing Script -->
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.edit-btn').on('click', function() {
+                const $row = $(this).closest('tr');
+                const $valueCell = $row.find('.value');
+                const originalValue = $valueCell.text();
+                
+                // Create an input field for editing
+                const input = $('<input>', {
+                    type: 'text',
+                    value: originalValue,
+                    class: 'form-control'
+                });
+
+                // Replace the text with the input field
+                $valueCell.html(input);
+
+                // Change Edit button to Save button
+                $(this).removeClass('btn-primary').addClass('btn-success').text('Save');
+
+                // Handle saving the new value
+                $(this).off('click').on('click', function() {
+                    const newValue = input.val();
+                    const fieldName = $row.find('td:first').text().toLowerCase().replace(/ /g, '_'); // Convert field name to lowercase with underscores
+                    const companyName = $row.data('company-name');
+
+                    // Send updated value to server
+                    $.post('/modify', {
+                        action: 'update',
+                        company_name: companyName,
+                        [fieldName]: newValue
+                    }).done(function(response) {
+                        // Restore the text with the new value
+                        $valueCell.text(newValue);
+                        alert('Updated successfully!');
+                        // Change Save button back to Edit button
+                        $('.edit-btn').removeClass('btn-success').addClass('btn-primary').text('Edit');
+                        $(this).off('click'); // Remove previous click event to avoid multiple bindings
+                        $(this).on('click', function() {
+                            // Re-enable edit functionality
+                            $row.find('.edit-btn').trigger('click');
+                        });
+                        
+                        // Rebind click event for all other buttons
+                        $('.edit-btn').on('click', function() {
+                            $(this).triggerHandler('click');
+                        });
+                   }).fail(function() {
+                       alert('Error updating value.');
+                       // Restore original value on error
+                       $valueCell.text(originalValue);
+                       $('.edit-btn').removeClass('btn-success').addClass('btn-primary').text('Edit');
+                   });
+               });
+           });
+       });
+   </script>
+
+</body>
+</html>
+

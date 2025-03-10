@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Details Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        @media (max-width: 600px) {
+            form {
+                padding: 15px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Company Details Form</h1>
+
+    <form action="/submit" method="POST" enctype="multipart/form-data">
+        <!-- Pass the company_id using hidden input (assuming it is passed dynamically) -->
+        <input type="hidden" name="company_id" id="company_id" value="{{ company_id }}">
+
+        <label for="company_name">Company Name:</label>
+        <input type="text" id="company_name" name="company_name" required>
+
+        <label for="business_domain">Business Domain:</label>
+        <input type="text" id="business_domain" name="business_domain" required>
+
+        <label for="specific_focus">Specific Focus:</label>
+        <input type="text" id="specific_focus" name="specific_focus" required>
+
+        <label for="target_audience">Target Audience:</label>
+        <input type="text" id="target_audience" name="target_audience" required>
+
+        <label for="key_features">Key Features:</label>
+        <textarea id="key_features" name="key_features" required></textarea>
+
+        <label for="unique_selling_points">Unique Selling Points:</label>
+        <textarea id="unique_selling_points" name="unique_selling_points" required></textarea>
+
+        <label for="pricing_packages">Pricing Packages:</label>
+        <textarea id="pricing_packages" name="pricing_packages" required></textarea>
+
+        <label for="days">Days:</label>
+        <input type="number" id="days" name="days" required>
+
+        <label>Target Platforms:</label>
+        <div class="checkbox-group">
+            <input type="checkbox" id="facebook" name="target_platform" value="Facebook"> Facebook<br>
+<input type="checkbox" id="instagram" name="target_platform" value="Instagram"> Instagram<br>
+<input type="checkbox" id="twitter" name="target_platform" value="Twitter"> Twitter<br>
+<input type="checkbox" id="linkedin" name="target_platform" value="LinkedIn"> LinkedIn<br><br>
+        </div>
+
+        <label for="products_or_services">Products or Services:</label>
+        <textarea id="products_or_services" name="products_or_services" required></textarea>
+
+
+        <label for="posting_schedule_type">Posting Schedule Type:</label>
+        <select id="posting_schedule_type" name="posting_schedule_type" required>
+            <option value="daily">Daily</option>
+            <option value="specific_days">Specific Days</option>
+        </select>
+        
+        <div id="specific_days_section" style="display: none;">
+            <label>Specific Days:</label>
+            <div class="checkbox-group">
+                <input type="checkbox" name="specific_days" value="Monday"> Monday
+                <input type="checkbox" name="specific_days" value="Tuesday"> Tuesday
+                <input type="checkbox" name="specific_days" value="Wednesday"> Wednesday
+                <input type="checkbox" name="specific_days" value="Thursday"> Thursday
+                <input type="checkbox" name="specific_days" value="Friday"> Friday
+                <input type="checkbox" name="specific_days" value="Saturday"> Saturday
+                <input type="checkbox" name="specific_days" value="Sunday"> Sunday
+            </div>
+        </div>
+
+
+
+
+
+        <!-- Optional logo upload -->
+        <label for="logo">Upload Logo:</label>
+        <input type="file" id="logo" name="logo">
+
+        <button type="submit">Submit</button>
+    </form>
+
+</body>
+
+        
+<script>
+    document.getElementById("posting_schedule_type").addEventListener("change", function() {
+        var specificDaysSection = document.getElementById("specific_days_section");
+        if (this.value === "specific_days") {
+            specificDaysSection.style.display = "block";
+        } else {
+            specificDaysSection.style.display = "none";
+        }
+    });
+    </script>
+</html>
